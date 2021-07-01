@@ -1,5 +1,7 @@
 import numpy as np
 from scipy import linalg as lin
+from matplotlib import pyplot as plt
+import time
 
 def odu4_1(koeffs, func, L, phi, psi, N):
     a4, a3, a2, a1, a0 = koeffs
@@ -104,12 +106,27 @@ def odu4_2(koeffs, func, L, phi, psi, N):
     res = lin.solve_banded((2, 2), A_band, F)
     return res
 
+def solve_and_plot(L, N):
+    print("N =", N)
+    start_time = time.time()
+    res1 = odu4_1([1, -1, 1, -1, 1], lambda x, y: -x * L / N, L, (1, 0), (0, -1), N)
+    print("Time for lin.solve:", time.time() - start_time)
+    start_time = time.time()
+    res2 = odu4_2([1, -1, 1, -1, 1], lambda x, y: -x * L / N, L, (1, 0), (0, -1), N)
+    print("Time for lin.solve_banded:", time.time() - start_time)
+    x = np.linspace(0, L, N + 1)
+    plt.plot(x, res1, "r-", label='lin.solve')
+    plt.plot(x, res2, "b-", label='lin.solve_banded')
+    plt.grid()
+    plt.legend(loc='best')
+    plt.xlabel('x')
+    plt.ylabel('u')
+    plt.show()
+
 if __name__ == '__main__':
     L = np.pi
-    N = 5
-    y1 = odu4_1([1, -1, 1, -1, 1], lambda x, y: -x * L / N, L, (1, 0), (0, -1), N)
-    print(y1)
-    y2 = odu4_2([1, -1, 1, -1, 1], lambda x, y: -x * L / N, L, (1, 0), (0, -1), N)
-    print(y2)
+    solve_and_plot(L, 100)
+    solve_and_plot(L, 1000)
+    solve_and_plot(L, 10000)
 
 
